@@ -30,7 +30,7 @@ class RestClientMappingContextFactoryBean extends AbstractMappingContextFactoryB
 
     @Override
     protected MappingContext createMappingContext() {
-        new RestClientMappingContext(defaultMapping.defaultMapping)
+        new RestClientMappingContext(defaultMapping?.defaultMapping)
     }
 }
 @Canonical

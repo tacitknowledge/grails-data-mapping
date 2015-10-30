@@ -12,16 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package grails.plugins.restClient
+
+import grails.core.GrailsClass
+import org.grails.core.artefact.DomainClassArtefactHandler
 import org.grails.datastore.gorm.rest.client.plugin.support.*
+
+import grails.plugins.Plugin
+import groovy.transform.CompileStatic
+import org.grails.datastore.gorm.rest.client.plugin.support.RestClientMethodsConfigurer
+import org.grails.datastore.mapping.rest.client.RestClientDatastore
+import org.springframework.beans.factory.support.BeanDefinitionRegistry
+import org.springframework.transaction.PlatformTransactionManager
 
 /**
  * @author Graeme Rocher
  */
-class GormRestClientGrailsPlugin {
+class GormRestClientGrailsPlugin extends Plugin{
     // the plugin version
     def version = "1.0.0"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "2.3 > *"
+    def grailsVersion = "2.5 > *"
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp"
@@ -54,15 +66,26 @@ A GORM implementation that can back onto a REST web service
     // Online location of the plugin's browseable source code.
     def scm = [ url: "https://github.com/grails/grails-data-mapping" ]
 
-    def doWithSpring = new RestClientSpringConfigurer().getConfiguration()
+    @Override
+    @CompileStatic
+    Closure doWithSpring() {
+        //return new RestClientSpringConfigurer().getConfiguration()
+        def initializer = new RestClientSpringInitializer(config, grailsApplication.getArtefacts(DomainClassArtefactHandler.TYPE).collect() { GrailsClass cls -> cls.clazz })
+        initializer.registerApplicationIfNotPresent = false
+        initializer.setSecondaryDatastore( false )
+        return initializer.getBeanDefinitions((BeanDefinitionRegistry)applicationContext)
+    }
 
-    def doWithDynamicMethods = { ctx ->
-        def datastore = ctx.getBean("restclientDatastore")
-        def transactionManager = ctx.getBean("restclientTransactionManager")
+
+    @Override
+    @CompileStatic
+    void doWithDynamicMethods() {
+        def ctx = applicationContext
+        def datastore = ctx.getBean(RestClientDatastore)
+        def transactionManager = ctx.getBean("restclientTransactionManager",PlatformTransactionManager)
         def methodsConfigurer = new RestClientMethodsConfigurer(datastore, transactionManager)
-        methodsConfigurer.hasExistingDatastore = manager.hasGrailsPlugin("hibernate")
-        def foe = application?.config?.grails?.gorm?.failOnError
-        methodsConfigurer.failOnError = foe instanceof Boolean ? foe : false
+        methodsConfigurer.hasExistingDatastore = manager?.hasGrailsPlugin("hibernate") || manager?.hasGrailsPlugin("hibernate4")
+        methodsConfigurer.failOnError = config.getProperty('grails.gorm.failOnError', Boolean, false)
         methodsConfigurer.configure()
     }
 }

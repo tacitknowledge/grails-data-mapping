@@ -40,7 +40,7 @@ project.ext {
     mongodbPluginVersion = releaseType == 'RELEASE' ? projectVersion : "${projectVersion}.${releaseType}"
     neo4jPluginVersion = releaseType == 'RELEASE' ? projectVersion : "${projectVersion}.${releaseType}"
     cassandraPluginVersion = releaseType == 'RELEASE' ? projectVersion : "${projectVersion}.${releaseType}"
-
+    restClientPluginVersion = releaseType == 'RELEASE' ? projectVersion : "${projectVersion}.${releaseType}"
 
     isCiBuild = project.hasProperty("isCiBuild")
     isBuildSnapshot = releaseType == "BUILD-SNAPSHOT"

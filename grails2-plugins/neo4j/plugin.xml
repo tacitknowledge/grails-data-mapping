@@ -1,0 +1,9 @@
+<plugin name='neo4j' version='5.0.0.BUILD-SNAPSHOT' grailsVersion='2.5.0 &gt; *'>
+  <author>Stefan Armbruster</author>
+  <authorEmail>stefan@armbruster-it.de</authorEmail>
+  <title>Neo4j GORM</title>
+  <description>A plugin that integrates the Neo4j graph datastore into Grails, providing a GORM API onto it</description>
+  <documentation>http://grails.github.io/grails-data-mapping/latest/neo4j/</documentation>
+  <type>Neo4jGrailsPlugin</type>
+  <resources />
+</plugin>
