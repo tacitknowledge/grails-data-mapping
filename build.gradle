@@ -43,6 +43,7 @@ project.ext {
     mongodbPluginVersion = defaultPluginVersion
     neo4jPluginVersion = defaultPluginVersion
     cassandraPluginVersion = defaultPluginVersion
+    restClientPluginVersion = defaultPluginVersion
 
 
     isCiBuild = project.hasProperty("isCiBuild")

@@ -2,13 +2,14 @@ package org.grails.datastore.gorm.rest.client.plugin.support
 
 import grails.core.GrailsApplication
 import groovy.transform.CompileStatic
+import org.grails.datastore.gorm.GormEnhancer
 import org.grails.datastore.gorm.bootstrap.AbstractDatastoreInitializer
-import org.grails.spring.beans.factory.InstanceFactoryBean
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition
+import org.grails.datastore.gorm.support.AbstractDatastorePersistenceContextInterceptor
+import org.grails.datastore.gorm.support.DatastorePersistenceContextInterceptor
+import org.grails.datastore.mapping.rest.client.RestClientDatastore
 import org.springframework.beans.factory.support.BeanDefinitionRegistry
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.GenericApplicationContext
-import org.grails.datastore.gorm.rest.client.RestClientGormEnhancer
 
 /**
  * Created by hjeong on 10/28/15.
@@ -48,6 +49,11 @@ class RestClientSpringInitializer extends AbstractDatastoreInitializer{
         super(configuration, persistentClasses)
     }
 
+    @Override
+    protected Class<AbstractDatastorePersistenceContextInterceptor> getPersistenceInterceptorClass() {
+        DatastorePersistenceContextInterceptor
+    }
+
     @CompileStatic
     ApplicationContext configure() {
         ExpandoMetaClass.enableGlobally()
@@ -60,7 +66,7 @@ class RestClientSpringInitializer extends AbstractDatastoreInitializer{
     @Override
     Closure getBeanDefinitions(BeanDefinitionRegistry beanDefinitionRegistry) {
         return {
-            final config = configurationObject
+            final config = configuration
 
             Closure defaultMapping = config.getProperty(SETTING_DEFAULT_MAPPING,Closure, this.defaultMapping)
             def restClientConfig = config.getProperty(SETTING_REST_CONNECTION, Map)
@@ -87,7 +93,7 @@ class RestClientSpringInitializer extends AbstractDatastoreInitializer{
             callable.delegate = delegate
             callable.call()
 
-            "org.grails.gorm.rest.internal.GORM_ENHANCER_BEAN-restclient"(RestClientGormEnhancer, ref("restclientDatastore"), ref("restclientTransactionManager")) { bean ->
+            "org.grails.gorm.rest.internal.GORM_ENHANCER_BEAN-restclient"(GormEnhancer, ref("restclientDatastore"), ref("restclientTransactionManager")) { bean ->
                 bean.initMethod = 'enhance'
                 bean.lazyInit = false
                 includeExternal = !secondaryDatastore
